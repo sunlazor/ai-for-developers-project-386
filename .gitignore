@@ -1,2 +1,8 @@
 #idea
 /.idea/
+
+# node
+/node_modules/
+
+/tsp-output/
+/package-lock.json
