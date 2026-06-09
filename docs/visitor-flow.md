@@ -12,36 +12,48 @@ Anonymous Visitor books a Slot against a Booking Type. No authentication.
 
 **Component:** `HomePage.tsx`
 
-| Step | Action       | UI / API                                                                    |
-|------|--------------|-----------------------------------------------------------------------------|
-| 1.1  | Page loads   | `GET /booking-types` → list of `BookingType`                                |
-| 1.2  | Page loads   | `GET /availability` → `AvailableSlot[]` (Visitor horizon: current week + 2) |
-| 1.3  | Visitor sees | Hero + "Book Now" button (opens Dialog)                                     |
-| 1.4  | Visitor sees | Grid of Booking Type cards (each has inline "Book" link)                    |
-| 1.5  | Visitor sees | "Available This Week" slot count (if any)                                   |
+| Step | Action         | UI / API                              |
+|------|----------------|---------------------------------------|
+| 1.1  | Page loads     | **No API calls** — zero data fetching |
+| 1.2  | Visitor sees   | Hero + "Book Now" button              |
+| 1.3  | Visitor clicks | "Book Now" → navigates to `/book`     |
 
-**Entry points to booking:**
+**Entry point to booking:**
 
-- **Dialog path:** Click "Book Now" → opens `BookingTypeSelector` modal → select type → navigates to `/book/:slug`
-- **Direct path:** Click "Book" on a Booking Type card → navigates to `/book/:slug`
+- Single "Book Now" button → navigates to `/book`
 
 ---
 
-### 2. Booking Page (`/book/:slug`)
+### 2. Booking Page (`/book`)
 
-**Component:** `BookingPage.tsx`
+**Component:** `BookingFlowPage.tsx`
 
 | Step | Action          | UI / API                                                                          |
 |------|-----------------|-----------------------------------------------------------------------------------|
-| 2.1  | Page loads      | `GET /booking-types` → find `BookingType` by `slug`                               |
-| 2.2  | Page loads      | `GET /availability` → `AvailableSlot[]` (same Visitor horizon)                    |
-| 2.3  | Visitor sees    | Booking Type title, description, duration                                         |
-| 2.4  | Visitor sees    | Grid of available Slot buttons (date + time in UTC)                               |
-| 2.5  | Visitor clicks  | Slot button → highlights selection (`selectedSlot` state)                         |
-| 2.6  | Visitor sees    | "Your details" form (name, email) — appears after slot selection                  |
-| 2.7  | Visitor submits | `POST /bookings` with `{ bookingTypeSlug, startSlot, visitorName, visitorEmail }` |
-| 2.8  | Success         | Toast "Booked!" → redirect to `/`                                                 |
-| 2.9  | Error           | Toast with error message                                                          |
+| 2.1  | Page loads      | `GET /booking-types` → list of `BookingType`                                      |
+| 2.2  | Page loads      | `GET /availability` → `AvailableSlot[]` (Visitor horizon: current week + 2)       |
+| 2.3  | Visitor sees    | Grid of active Booking Type cards                                                 |
+| 2.4  | Visitor clicks  | Booking Type card → highlights selection                                          |
+| 2.5  | Visitor sees    | Grid of available Slot buttons (date + time in UTC)                               |
+| 2.6  | Visitor clicks  | Slot button → highlights selection                                                |
+| 2.7  | Visitor sees    | "Your details" form (name, email) — appears after slot selection                  |
+| 2.8  | Visitor submits | `POST /bookings` with `{ bookingTypeSlug, startSlot, visitorName, visitorEmail }` |
+| 2.9  | Success         | Toast "Booked!" → redirect to `/`                                                 |
+| 2.10 | Error           | Toast with error message                                                          |
+
+**Empty states (inline, not modal):**
+
+- No active booking types → "Host on weekation / No meeting types are available right now."
+- Active types exist but no slots → "No available slots for this meeting type."
+
+---
+
+### 3. Deep Links
+
+| Path                  | Behavior                                                                 |
+|-----------------------|--------------------------------------------------------------------------|
+| `/book/:slug`         | Redirects to `/book?type=:slug` — pre-selects booking type               |
+| `/book/:slug/:slotId` | Redirects to `/book?type=:slug&slot=:slotId` — pre-selects type and slot |
 
 ---
 
@@ -71,24 +83,21 @@ Anonymous Visitor books a Slot against a Booking Type. No authentication.
 
 ```mermaid
 flowchart TD
-    A[Visitor lands on /] --> B{GET /booking-types}
-    A --> C{GET /availability}
-    B --> D[HomePage renders]
-    C --> D
-    D --> E[Visitor clicks "Book Now" or Card "Book"]
-    E --> F{Dialog opens: BookingTypeSelector}
-    F --> G[Visitor selects Booking Type]
-    G --> H[Navigate to /book/:slug]
-    H --> I{GET /booking-types (find by slug)}
-    H --> J{GET /availability}
-    I --> K[BookingPage renders]
-    J --> K
-    K --> L[Visitor clicks Slot button]
-    L --> M[Slot highlighted]
-    M --> N[Form appears: name + email]
-    N --> O[Visitor submits]
-    O --> P{POST /bookings}
-    P --> Q{Success?}
-    Q -->|Yes| R[Toast + redirect to /]
-    Q -->|No| S[Toast error]
+    A[Visitor lands on /] --> B[HomePage renders - zero fetch]
+    B --> C[Visitor clicks "Book Now"]
+    C --> D[Navigate to /book]
+    D --> E{GET /booking-types}
+    D --> F{GET /availability}
+    E --> G[BookingFlowPage renders]
+    F --> G
+    G --> H[Visitor clicks Booking Type card]
+    H --> I[Type highlighted]
+    I --> J[Visitor clicks Slot button]
+    J --> K[Slot highlighted]
+    K --> L[Form appears: name + email]
+    L --> M[Visitor submits]
+    M --> N{POST /bookings}
+    N --> O{Success?}
+    O -->|Yes| P[Toast + redirect to /]
+    O -->|No| Q[Toast error]
 ```

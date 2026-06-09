@@ -53,7 +53,7 @@ export function BookingPage() {
             toast({title: 'Booked!', description: 'Your meeting has been scheduled.'})
             navigate('/')
         },
-        onError: (err: any) => {
+        onError: (err: Error) => {
             toast({
                 title: 'Booking failed',
                 description: err?.message ?? 'Something went wrong.',
