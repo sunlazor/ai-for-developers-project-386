@@ -1,11 +1,14 @@
 import {useQuery} from '@tanstack/react-query'
-import {Link} from 'react-router-dom'
+import {useNavigate, Link} from 'react-router-dom'
 import {api} from '@/api/client'
 import {Card, CardHeader, CardTitle, CardDescription, CardContent} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Clock, Calendar} from 'lucide-react'
+import {Dialog, DialogTrigger} from '@/components/ui/dialog'
+import {BookingTypeSelector} from '@/components/BookingTypeSelector'
 
 export function HomePage() {
+    const navigate = useNavigate()
     const {data: bookingTypes, isLoading} = useQuery({
         queryKey: ['bookingTypes'],
         queryFn: api.listBookingTypes,
@@ -16,6 +19,10 @@ export function HomePage() {
         queryFn: api.getAvailability,
     })
 
+    const handleBookNow = (slug: string) => {
+        navigate(`/book/${slug}`)
+    }
+
     return (
         <div className="space-y-8">
             <section className="text-center space-y-4">
@@ -23,6 +30,20 @@ export function HomePage() {
                 <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                     Choose a meeting type and pick an available slot that works for you.
                 </p>
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button size="lg" className="w-full sm:w-auto">
+                            <Calendar className="h-4 w-4 mr-2"/>
+                            Book Now
+                        </Button>
+                    </DialogTrigger>
+                    <BookingTypeSelector
+                        bookingTypes={bookingTypes ?? []}
+                        onSelect={handleBookNow}
+                        onClose={() => {
+                        }}
+                    />
+                </Dialog>
             </section>
 
             <section>
