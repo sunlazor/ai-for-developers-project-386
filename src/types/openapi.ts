@@ -4,7 +4,7 @@
  */
 
 export interface paths {
-    "/availability": {
+    "/api/availability": {
         parameters: {
             query?: never;
             header?: never;
@@ -24,7 +24,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/booking-types": {
+    "/api/booking-types": {
         parameters: {
             query?: never;
             header?: never;
@@ -41,7 +41,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/bookings": {
+    "/api/bookings": {
         parameters: {
             query?: never;
             header?: never;
@@ -62,7 +62,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/host/availability": {
+    "/api/host/availability": {
         parameters: {
             query?: never;
             header?: never;
@@ -83,7 +83,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/host/booking-types": {
+    "/api/host/booking-types": {
         parameters: {
             query?: never;
             header?: never;
@@ -99,7 +99,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/host/booking-types/{slug}": {
+    "/api/host/booking-types/{slug}": {
         parameters: {
             query?: never;
             header?: never;
@@ -115,7 +115,7 @@ export interface paths {
         patch: operations["HostApi_updateBookingType"];
         trace?: never;
     };
-    "/host/booking-types/{slug}/deactivate": {
+    "/api/host/booking-types/{slug}/deactivate": {
         parameters: {
             query?: never;
             header?: never;
@@ -131,7 +131,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/host/bookings": {
+    "/api/host/bookings": {
         parameters: {
             query?: never;
             header?: never;
@@ -148,7 +148,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/host/bookings/{id}/cancel": {
+    "/api/host/bookings/{id}/cancel": {
         parameters: {
             query?: never;
             header?: never;

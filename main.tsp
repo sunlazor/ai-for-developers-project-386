@@ -199,7 +199,7 @@ model CreateBooking {
 // ---------------------------------------------------------------------------
 
 /** Public endpoints. No authentication required. */
-@route("/")
+@route("/api")
 namespace Public {
   /** List active Booking Types. */
   @route("/booking-types")
@@ -237,7 +237,7 @@ namespace Public {
 
 /** Host-only endpoints. Require Bearer authentication. */
 @useAuth(BearerAuth)
-@route("/host")
+@route("/api/host")
 namespace HostApi {
   // --- Booking Types ---
 
