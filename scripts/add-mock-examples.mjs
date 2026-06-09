@@ -180,7 +180,7 @@ const bookings = bookingDefs.map(({d, h, m, slug, name, email}) => ({
 
 const paths = spec.paths;
 
-if (paths['/booking-types']?.get?.responses?.['200']?.content?.['application/json']) {
+if (paths['/api/booking-types']?.get?.responses?.['200']?.content?.['application/json']) {
     const bookingTypes = [
         {
             slug: 'intro-call',
@@ -211,19 +211,19 @@ if (paths['/booking-types']?.get?.responses?.['200']?.content?.['application/jso
             active: false
         },
     ];
-    paths['/booking-types'].get.responses['200'].content['application/json'].example = bookingTypes;
+    paths['/api/booking-types'].get.responses['200'].content['application/json'].example = bookingTypes;
 }
 
-if (paths['/availability']?.get?.responses?.['200']?.content?.['application/json']) {
-    paths['/availability'].get.responses['200'].content['application/json'].example = availableSlots;
+if (paths['/api/availability']?.get?.responses?.['200']?.content?.['application/json']) {
+    paths['/api/availability'].get.responses['200'].content['application/json'].example = availableSlots;
 }
 
-if (paths['/host/availability']?.get?.responses?.['200']?.content?.['application/json']) {
-    paths['/host/availability'].get.responses['200'].content['application/json'].example = hostSlots;
+if (paths['/api/host/availability']?.get?.responses?.['200']?.content?.['application/json']) {
+    paths['/api/host/availability'].get.responses['200'].content['application/json'].example = hostSlots;
 }
 
-if (paths['/host/bookings']?.get?.responses?.['200']?.content?.['application/json']) {
-    paths['/host/bookings'].get.responses['200'].content['application/json'].example = bookings;
+if (paths['/api/host/bookings']?.get?.responses?.['200']?.content?.['application/json']) {
+    paths['/api/host/bookings'].get.responses['200'].content['application/json'].example = bookings;
 }
 
 writeFileSync(OPENAPI_PATH, yaml.dump(spec, {indent: 2, lineWidth: 120, noRefs: true}));
