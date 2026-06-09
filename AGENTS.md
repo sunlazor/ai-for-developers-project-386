@@ -109,3 +109,7 @@ Key invariants to honor:
 - Vitest is the test runner (`npm test`). No tests exist yet.
 - Add tests alongside changes, especially for the slot-grid and UTC date logic
   in `src/lib/utils.ts`, where correctness is easy to get subtly wrong.
+
+## Reference docs (non-binding)
+
+- `docs/visitor-flow.md` — current Visitor flow steps + diagram
