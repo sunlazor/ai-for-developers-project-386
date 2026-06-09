@@ -91,6 +91,10 @@ model Conflict {
  * A reusable template the Host defines, describing one kind of bookable meeting.
  * Not tied to any specific date or time.
  */
+@example(#{ slug: "intro-call", title: "Intro Call", description: "A quick 30-minute introductory call to discuss your needs.", durationSlots: 2, active: true })
+@example(#{ slug: "deep-dive", title: "Deep Dive Session", description: "A 60-minute deep dive into your project requirements.", durationSlots: 4, active: true })
+@example(#{ slug: "quick-chat", title: "Quick Chat", description: "A brief 15-minute chat for quick questions.", durationSlots: 1, active: true })
+@example(#{ slug: "workshop", title: "Workshop", description: "A 90-minute hands-on workshop session.", durationSlots: 6, active: false })
 model BookingType {
   /** URL-friendly slug. Unique and immutable; serves as the identifier. */
   @key slug: Slug;

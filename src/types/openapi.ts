@@ -169,9 +169,7 @@ export interface paths {
         trace?: never;
     };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
     schemas: {
         /**
@@ -212,6 +210,13 @@ export interface components {
         /**
          * @description A reusable template the Host defines, describing one kind of bookable meeting.
          *     Not tied to any specific date or time.
+         * @example {
+         *       "slug": "workshop",
+         *       "title": "Workshop",
+         *       "description": "A 90-minute hands-on workshop session.",
+         *       "durationSlots": 6,
+         *       "active": false
+         *     }
          */
         BookingType: {
             /** @description URL-friendly slug. Unique and immutable; serves as the identifier. */
@@ -296,9 +301,7 @@ export interface components {
     headers: never;
     pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
 export interface operations {
     Public_getAvailability: {
         parameters: {
