@@ -16,7 +16,9 @@ anonymous Visitors book them against a Booking Type.
 
 ## Architecture
 
-A frontend-only SPA backed by a **mocked** API. There is no real server.
+A React SPA frontend with two interchangeable API backends: a **mocked** API
+(Prism) and a **real** Symfony backend under `backend/` (see ADR-0003). Both
+implement the same `main.tsp` contract.
 
 - **Frontend**: React 18 + TypeScript + Vite. Routing via `react-router-dom`,
   data fetching via TanStack Query, forms via `react-hook-form` + `zod`.
@@ -24,7 +26,10 @@ A frontend-only SPA backed by a **mocked** API. There is no real server.
   `src/components/ui`. An MCP server for shadcn is configured in `opencode.json`.
 - **API contract**: defined in TypeSpec (`main.tsp`), compiled to OpenAPI
   (`tsp-output/openapi/openapi.yaml`), then served as a mock by Prism.
-- **Wiring**: Vite dev server (`:3000`) proxies `/api` → Prism mock (`:4010`).
+- **Backend**: PHP Symfony 7 under `backend/`, Doctrine + SQLite, implementing
+  the `main.tsp` contract. Static Bearer token auth for Host endpoints.
+- **Wiring**: Vite dev server (`:3000`) proxies `/api` → Prism mock (`:4010`)
+  by default, or → Symfony (`:9000`) via `npm run dev:real`.
 
 ### Source layout
 
@@ -36,6 +41,9 @@ A frontend-only SPA backed by a **mocked** API. There is no real server.
 - `src/components/` — `Layout` + `ui/` (shadcn primitives).
 - `src/lib/utils.ts` — `cn`, UTC date/time formatting, and slot-grid helpers.
 - `src/hooks/` — shared hooks.
+- `backend/` — Symfony 7 backend (see ADR-0003). Controllers under
+  `backend/src/Controller/` map onto the `main.tsp` operations; Doctrine
+  entities under `backend/src/Entity/` mirror the TypeSpec models.
 
 ## The API contract is the source of truth
 
@@ -77,6 +85,14 @@ npm run lint               # ESLint — the only automated style gate
 npm run build              # tsc typecheck + vite build
 npm run typespec:compile   # only if main.tsp changed
 npm test                   # Vitest
+```
+
+If you changed anything under `backend/`, also run the PHP gate:
+
+```sh
+cd backend
+php bin/phpunit                          # PHPUnit
+php bin/console doctrine:schema:validate # entities ↔ schema in sync
 ```
 
 ## Conventions
