@@ -7,3 +7,8 @@
 /tsp-output/
 /package-lock.json
 /dist/
+
+# Symfony backend
+/backend/vendor/
+/backend/var/
+/backend/.env.local

@@ -73,8 +73,19 @@ npm run mock               # Prism mock API on :4010
 npm run dev                # Vite dev server on :3000 (proxies /api → :4010)
 ```
 
+To use the **real Symfony backend** instead of the Prism mock:
+
+```sh
+# Terminal 1: start Symfony on :9000
+cd backend && php -S localhost:9000 -t public/
+
+# Terminal 2: start Vite with proxy pointing at Symfony
+npm run dev:real
+```
+
 As an agent, do **not** start these servers yourself unless asked — assume the
-human runs them, and ask them to restart if you changed `main.tsp`.
+human runs them, and ask them to restart if you changed `main.tsp` or the
+backend code.
 
 ## Verification gate
 
