@@ -4,6 +4,7 @@ import {api} from '@/api/client'
 import {Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter} from '@/components/ui/card'
 import {Button} from '@/components/ui/button'
 import {Input} from '@/components/ui/input'
+import {Tabs, TabsList, TabsTrigger, TabsContent} from '@/components/ui/tabs'
 import {toast} from '@/components/ui/use-toast'
 import {
     Dialog,
@@ -136,8 +137,14 @@ export function HostPage() {
             </section>
 
             {isAuthed && (
-                <>
-                    <section>
+                <Tabs defaultValue="bookings">
+                    <TabsList>
+                        <TabsTrigger value="bookings">Bookings</TabsTrigger>
+                        <TabsTrigger value="slots">Slots</TabsTrigger>
+                        <TabsTrigger value="booking-types">Booking Types</TabsTrigger>
+                    </TabsList>
+
+                    <TabsContent value="booking-types">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-2xl font-semibold">Booking Types</h2>
                             <CreateBookingTypeDialog token={token}/>
@@ -188,59 +195,11 @@ export function HostPage() {
                                 </Card>
                             ))}
                         </div>
-                    </section>
+                    </TabsContent>
 
-                    {confirmAction && (
-                        <Dialog open onOpenChange={() => setConfirmAction(null)}>
-                            <DialogContent className="sm:max-w-[400px]">
-                                <DialogHeader>
-                                    <DialogTitle>
-                                        {confirmAction.type === 'deactivate'
-                                            ? 'Deactivate Booking Type'
-                                            : 'Activate Booking Type'}
-                                    </DialogTitle>
-                                    <DialogDescription>
-                                        {confirmAction.type === 'deactivate'
-                                            ? `"${confirmAction.title}" will be hidden from visitors. Existing bookings remain valid.`
-                                            : `"${confirmAction.title}" will be visible to visitors again.`}
-                                    </DialogDescription>
-                                </DialogHeader>
-                                <DialogFooter className="gap-2">
-                                    <Button
-                                        variant="outline"
-                                        onClick={() => setConfirmAction(null)}
-                                    >
-                                        Cancel
-                                    </Button>
-                                    <Button
-                                        variant={
-                                            confirmAction.type === 'deactivate'
-                                                ? 'destructive'
-                                                : 'default'
-                                        }
-                                        onClick={() => {
-                                            const fn =
-                                                confirmAction.type === 'deactivate'
-                                                    ? deactivateBt.mutate
-                                                    : activateBt.mutate
-                                            fn(confirmAction.slug)
-                                        }}
-                                        disabled={
-                                            deactivateBt.isPending || activateBt.isPending
-                                        }
-                                    >
-                                        {confirmAction.type === 'deactivate'
-                                            ? 'Deactivate'
-                                            : 'Activate'}
-                                    </Button>
-                                </DialogFooter>
-                            </DialogContent>
-                        </Dialog>
-                    )}
-
-                    <section>
+                    <TabsContent value="slots">
                         <h2 className="text-2xl font-semibold mb-4">
-                            Availability ({hostSlots.data?.filter(s => s.state === 'available').length ?? 0} open)
+                            Slots ({hostSlots.data?.filter(s => s.state === 'available').length ?? 0} open)
                         </h2>
                         {hostSlots.data && (
                             <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
@@ -262,9 +221,9 @@ export function HostPage() {
                                 ))}
                             </div>
                         )}
-                    </section>
+                    </TabsContent>
 
-                    <section>
+                    <TabsContent value="bookings">
                         <h2 className="text-2xl font-semibold mb-4">Bookings</h2>
                         {bookings.data?.length === 0 && (
                             <p className="text-muted-foreground">No bookings yet.</p>
@@ -292,8 +251,56 @@ export function HostPage() {
                                 </Card>
                             ))}
                         </div>
-                    </section>
-                </>
+                    </TabsContent>
+                </Tabs>
+            )}
+
+            {isAuthed && confirmAction && (
+                <Dialog open onOpenChange={() => setConfirmAction(null)}>
+                    <DialogContent className="sm:max-w-[400px]">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {confirmAction.type === 'deactivate'
+                                    ? 'Deactivate Booking Type'
+                                    : 'Activate Booking Type'}
+                            </DialogTitle>
+                            <DialogDescription>
+                                {confirmAction.type === 'deactivate'
+                                    ? `"${confirmAction.title}" will be hidden from visitors. Existing bookings remain valid.`
+                                    : `"${confirmAction.title}" will be visible to visitors again.`}
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setConfirmAction(null)}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant={
+                                    confirmAction.type === 'deactivate'
+                                        ? 'destructive'
+                                        : 'default'
+                                }
+                                onClick={() => {
+                                    const fn =
+                                        confirmAction.type === 'deactivate'
+                                            ? deactivateBt.mutate
+                                            : activateBt.mutate
+                                    fn(confirmAction.slug)
+                                }}
+                                disabled={
+                                    deactivateBt.isPending || activateBt.isPending
+                                }
+                            >
+                                {confirmAction.type === 'deactivate'
+                                    ? 'Deactivate'
+                                    : 'Activate'}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             )}
         </div>
     )
