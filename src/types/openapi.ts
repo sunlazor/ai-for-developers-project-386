@@ -90,7 +90,8 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** @description List all Booking Types (including inactive), for the Host Dashboard. */
+        get: operations["HostApi_listAllBookingTypes"];
         put?: never;
         post: operations["HostApi_createBookingType"];
         delete?: never;
@@ -486,6 +487,38 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Unprocessable"];
+                };
+            };
+        };
+    };
+    HostApi_listAllBookingTypes: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingType"][];
+                };
+            };
+            /**
+             * @description Returned by Host-only endpoints when the Bearer token is missing or invalid.
+             *     There is exactly one Host; Visitor endpoints are public.
+             */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Unauthorized"];
                 };
             };
         };

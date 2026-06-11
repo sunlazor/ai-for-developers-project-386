@@ -52,6 +52,9 @@ export const api = {
         request('/bookings', {method: 'POST', body: JSON.stringify(body)}),
 
     // Host endpoints
+    listAllBookingTypes: (token: string): Promise<BookingType[]> =>
+        request('/host/booking-types', {headers: authHeaders(token)}),
+
     createBookingType: (body: CreateBookingType, token: string): Promise<BookingType> =>
         request('/host/booking-types', {
             method: 'POST',

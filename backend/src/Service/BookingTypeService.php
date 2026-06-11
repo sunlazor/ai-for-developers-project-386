@@ -40,6 +40,21 @@ class BookingTypeService
     }
 
     /**
+     * List all Booking Types (including inactive), ordered by title.
+     *
+     * @return BookingType[]
+     */
+    public function listAll(): array
+    {
+        return $this->em
+            ->getRepository(BookingType::class)
+            ->createQueryBuilder('bt')
+            ->orderBy('bt.title', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Find a Booking Type by slug (regardless of active state).
      */
     public function find(string $slug): ?BookingType

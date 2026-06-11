@@ -272,6 +272,11 @@ namespace HostApi {
     | NotFound
     | Unauthorized;
 
+  /** List all Booking Types (including inactive), for the Host Dashboard. */
+  @route("/booking-types")
+  @get
+  op listAllBookingTypes(): BookingType[] | Unauthorized;
+
   // --- Availability ---
 
   /** All Slots with their state within the Host horizon. */

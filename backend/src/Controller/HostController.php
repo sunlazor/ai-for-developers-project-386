@@ -131,6 +131,24 @@ class HostController extends AbstractController
     }
 
     /**
+     * List all Booking Types (including inactive) for the Host Dashboard.
+     */
+    #[Route('/booking-types', methods: ['GET'])]
+    public function listAllBookingTypes(BookingTypeService $service): JsonResponse
+    {
+        $bts = $service->listAll();
+
+        return $this->json(array_map(fn($bt)
+            => [
+            'slug' => $bt->getSlug(),
+            'title' => $bt->getTitle(),
+            'description' => $bt->getDescription(),
+            'durationSlots' => $bt->getDurationSlots(),
+            'active' => $bt->isActive(),
+        ], $bts));
+    }
+
+    /**
      * All Slots with their state within the Host horizon.
      */
     #[Route('/availability', methods: ['GET'])]

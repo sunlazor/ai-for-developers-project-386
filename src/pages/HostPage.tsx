@@ -30,7 +30,8 @@ export function HostPage() {
 
     const bookingTypes = useQuery({
         queryKey: ['host-bookingTypes'],
-        queryFn: () => api.listBookingTypes(),
+        queryFn: () => api.listAllBookingTypes(token),
+        enabled: isAuthed,
     })
 
     const hostSlots = useQuery({
