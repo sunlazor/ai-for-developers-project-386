@@ -32,11 +32,11 @@ exactly one Host; every `/api/host/*` endpoint requires authentication.
 
 **Component:** `HostPage.tsx` (reached via the "Host" link in `Layout.tsx`)
 
-| Step | Action      | UI / API                                         |
-|------|-------------|--------------------------------------------------|
-| 1.1  | Page loads  | Check for an existing session cookie             |
-| 1.2  | No session  | Render the sign-in form (§2)                     |
-| 1.3  | Has session | Render the Host dashboard and load data (§3, §4) |
+| Step | Action      | UI / API                                             |
+|------|-------------|------------------------------------------------------|
+| 1.1  | Page loads  | Check for an existing session cookie                 |
+| 1.2  | No session  | Render the sign-in form (§2)                         |
+| 1.3  | Has session | Render the Host dashboard and load data (§3, §4, §5) |
 
 ---
 
@@ -57,16 +57,16 @@ the sign-in form ("Session expired — please sign in again").
 
 ### 3. Manage Slots (Availability)
 
-| Step | Action          | UI / API                                                                              |
-|------|-----------------|---------------------------------------------------------------------------------------|
-| 3.1  | Dashboard loads | `GET /api/host/availability` → `HostSlot[]` (Host horizon: current week + 4)          |
-| 3.2  | Host sees       | A 15-minute Slot grid grouped by day, each Slot showing its `state`                   |
-| 3.3  | Host clicks     | An `unavailable` Slot → stage it to `available` (open)                                |
-| 3.4  | Host clicks     | An `available` Slot → stage it to `unavailable` (close)                               |
-| 3.5  | Booked Slot     | A `booked` Slot is **not** editable here — must cancel its Booking first (§4)         |
-| 3.6  | Host submits    | `PUT /api/host/availability` with `AvailabilityEdit[]` → updated `HostSlot[]`         |
-| 3.7  | Success         | Grid reflects the new states; toast "Availability updated"                            |
-| 3.8  | Error           | `422 Unprocessable` (edited a booked Slot, off-grid, or beyond horizon) → toast error |
+| Step | Action          | UI / API                                                                                                    |
+|------|-----------------|-------------------------------------------------------------------------------------------------------------|
+| 3.1  | Dashboard loads | `GET /api/host/availability` → `HostSlot[]` (Host horizon: current week + 4); also loads Booking Types (§5) |
+| 3.2  | Host sees       | A 15-minute Slot grid grouped by day, each Slot showing its `state`                                         |
+| 3.3  | Host clicks     | An `unavailable` Slot → stage it to `available` (open)                                                      |
+| 3.4  | Host clicks     | An `available` Slot → stage it to `unavailable` (close)                                                     |
+| 3.5  | Booked Slot     | A `booked` Slot is **not** editable here — must cancel its Booking first (§4)                               |
+| 3.6  | Host submits    | `PUT /api/host/availability` with `AvailabilityEdit[]` → updated `HostSlot[]`                               |
+| 3.7  | Success         | Grid reflects the new states; toast "Availability updated"                                                  |
+| 3.8  | Error           | `422 Unprocessable` (edited a booked Slot, off-grid, or beyond horizon) → toast error                       |
 
 **Slot states (`SlotState`):**
 
@@ -96,29 +96,65 @@ them in §3 to make them bookable again.
 
 ---
 
+### 5. Manage Booking Types
+
+The **Booking Types** section appears at the top of the dashboard (above
+Availability). It lists all Booking Types (active and inactive) and lets the
+Host create new ones or deactivate old ones.
+
+| Step | Action                   | UI / API                                                                                                                            |
+|------|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 5.1  | Dashboard loads          | `GET /api/booking-types` → `BookingType[]` (all types, active + inactive)                                                           |
+| 5.2  | Host sees                | Cards for each Booking Type showing title, description, duration (`durationSlots × 15 min`), and an **Active** / **Inactive** badge |
+| 5.3  | Host clicks "New Type"   | Opens an inline or modal **create form** with fields: slug, title, description, durationSlots                                       |
+| 5.4  | Host fills & submits     | `POST /api/host/booking-types` with `CreateBookingType` body                                                                        |
+| 5.5  | Success                  | Card added to the grid; toast "Booking Type created"                                                                                |
+| 5.6  | Duplicate slug           | `422 Unprocessable` → toast "Slug already exists"                                                                                   |
+| 5.7  | Host clicks "Deactivate" | Confirmation dialog → `POST /api/host/booking-types/{slug}/deactivate`                                                              |
+| 5.8  | Success                  | Card badge flips to **Inactive**; toast "Booking Type deactivated"                                                                  |
+| 5.9  | Not found                | `404 Not Found` → toast error                                                                                                       |
+
+**Key rules:**
+
+- **Slug** and **durationSlots** are immutable after creation.
+- Deactivation is **soft** — `active = false`. The record is retained and
+  existing Bookings referencing it remain valid.
+- Only **title** and **description** can be edited after creation (via
+  `PATCH /api/host/booking-types/{slug}`); this is a future enhancement not yet
+  exposed in the UI.
+- Deactivated Booking Types are hidden from the Visitor flow but still visible
+  to the Host.
+
+---
+
 ## Domain Rules Enforced
 
-| Rule                       | Where Enforced                                                                        |
-|----------------------------|---------------------------------------------------------------------------------------|
-| **UTC only**               | `formatTime`/`formatDate` in `utils.ts` use `timeZone: 'UTC'`                         |
-| **15-min Slots**           | Slot grid aligned to `:00/:15/:30/:45`                                                |
-| **Host horizon**           | `GET /api/host/availability` returns only Slots within current week + 4 (server-side) |
-| **Slot states**            | `HostSlot.state` is `unavailable` \| `available` \| `booked`                          |
-| **Booked Slots immutable** | `PUT /api/host/availability` rejects editing a `booked` Slot (`422`)                  |
-| **Cancel → `unavailable`** | Cancelled Booking's Slots return to `unavailable`, not `available` (server-side)      |
-| **Booking ID format**      | `YYYY-MM-DD-HH-MM` (UTC) derived from `startSlot`                                     |
-| **Single Host auth**       | All `/api/host/*` endpoints require authentication; `401` otherwise                   |
+| Rule                               | Where Enforced                                                                                |
+|------------------------------------|-----------------------------------------------------------------------------------------------|
+| **UTC only**                       | `formatTime`/`formatDate` in `utils.ts` use `timeZone: 'UTC'`                                 |
+| **15-min Slots**                   | Slot grid aligned to `:00/:15/:30/:45`                                                        |
+| **Host horizon**                   | `GET /api/host/availability` returns only Slots within current week + 4 (server-side)         |
+| **Slot states**                    | `HostSlot.state` is `unavailable` \| `available` \| `booked`                                  |
+| **Booked Slots immutable**         | `PUT /api/host/availability` rejects editing a `booked` Slot (`422`)                          |
+| **Cancel → `unavailable`**         | Cancelled Booking's Slots return to `unavailable`, not `available` (server-side)              |
+| **Booking ID format**              | `YYYY-MM-DD-HH-MM` (UTC) derived from `startSlot`                                             |
+| **Single Host auth**               | All `/api/host/*` endpoints require authentication; `401` otherwise                           |
+| **Slug & durationSlots immutable** | Slug and `durationSlots` cannot be changed after creation (server-side)                       |
+| **Deactivation is soft**           | Deactivation sets `active = false`; the record is retained and existing Bookings remain valid |
 
 ---
 
 ## API Endpoints Used (Host)
 
-| Method | Path                             | Request              | Response     |
-|--------|----------------------------------|----------------------|--------------|
-| GET    | `/api/host/availability`         | —                    | `HostSlot[]` |
-| PUT    | `/api/host/availability`         | `AvailabilityEdit[]` | `HostSlot[]` |
-| GET    | `/api/host/bookings`             | —                    | `Booking[]`  |
-| POST   | `/api/host/bookings/{id}/cancel` | —                    | `204`        |
+| Method | Path                                        | Request              | Response            |
+|--------|---------------------------------------------|----------------------|---------------------|
+| GET    | `/api/host/availability`                    | —                    | `HostSlot[]`        |
+| PUT    | `/api/host/availability`                    | `AvailabilityEdit[]` | `HostSlot[]`        |
+| GET    | `/api/host/bookings`                        | —                    | `Booking[]`         |
+| POST   | `/api/host/bookings/{id}/cancel`            | —                    | `204`               |
+| POST   | `/api/host/booking-types`                   | `CreateBookingType`  | `201 + BookingType` |
+| POST   | `/api/host/booking-types/{slug}/deactivate` | —                    | `BookingType`       |
+| PATCH  | `/api/host/booking-types/{slug}`            | `UpdateBookingType`  | `BookingType`       |
 
 All Host endpoints require authentication (see the Auth note above).
 
@@ -135,10 +171,26 @@ flowchart TD
     E -->|No / 401| C
     E -->|Yes| F[Set HttpOnly cookie]
     B -->|Yes| F
-    F --> G{GET /api/host/availability}
+    F --> G1{GET /api/booking-types}
+    F --> G2{GET /api/host/availability}
     F --> H{GET /api/host/bookings}
-    G --> I[Render Slot grid by state]
+    G1 --> I0[Render Booking Type cards]
+    G2 --> I[Render Slot grid by state]
     H --> J[Render Bookings list]
+
+    I0 --> K0[Host clicks New Type]
+    K0 --> L0[Fill create form]
+    L0 --> M0{POST /api/host/booking-types}
+    M0 -->|201| N0[Card added + toast]
+    M0 -->|422| O0[Toast: duplicate slug]
+    M0 -->|401| C
+
+    I0 --> P0[Host clicks Deactivate]
+    P0 --> Q0[Confirm dialog]
+    Q0 --> R0{POST /api/host/booking-types/:slug/deactivate}
+    R0 -->|200| S0[Badge → Inactive + toast]
+    R0 -->|404| T0[Toast: not found]
+    R0 -->|401| C
 
     I --> K[Host toggles unavailable/available Slots]
     K --> L{PUT /api/host/availability}
