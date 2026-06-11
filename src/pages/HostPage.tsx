@@ -15,7 +15,8 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog'
 import {CreateBookingTypeDialog} from '@/components/host/CreateBookingTypeDialog'
-import {formatTime, formatDate} from '@/lib/utils'
+import {SlotManager} from '@/components/host/SlotManager'
+import {formatDate, formatTime} from '@/lib/utils'
 
 export function HostPage() {
     const [token, setToken] = useState('')
@@ -32,12 +33,6 @@ export function HostPage() {
     const bookingTypes = useQuery({
         queryKey: ['host-bookingTypes'],
         queryFn: () => api.listAllBookingTypes(token),
-        enabled: isAuthed,
-    })
-
-    const hostSlots = useQuery({
-        queryKey: ['host-availability', token],
-        queryFn: () => api.getHostAvailability(token),
         enabled: isAuthed,
     })
 
@@ -198,29 +193,7 @@ export function HostPage() {
                     </TabsContent>
 
                     <TabsContent value="slots">
-                        <h2 className="text-2xl font-semibold mb-4">
-                            Slots ({hostSlots.data?.filter(s => s.state === 'available').length ?? 0} open)
-                        </h2>
-                        {hostSlots.data && (
-                            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                                {hostSlots.data.slice(0, 48).map((slot) => (
-                                    <div
-                                        key={slot.start}
-                                        className={`p-2 rounded text-xs border ${
-                                            slot.state === 'booked'
-                                                ? 'bg-destructive/10 border-destructive/30'
-                                                : slot.state === 'available'
-                                                    ? 'bg-primary/10 border-primary/30'
-                                                    : 'bg-muted border-muted'
-                                        }`}
-                                    >
-                                        <div>{formatDate(new Date(slot.start))}</div>
-                                        <div>{formatTime(new Date(slot.start))}</div>
-                                        <div className="capitalize">{slot.state}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
+                        <SlotManager token={token}/>
                     </TabsContent>
 
                     <TabsContent value="bookings">
