@@ -107,6 +107,30 @@ class HostController extends AbstractController
     }
 
     /**
+     * Activate a previously deactivated Booking Type.
+     */
+    #[Route('/booking-types/{slug}/activate', methods: ['POST'])]
+    public function activateBookingType(string $slug, BookingTypeService $service): JsonResponse
+    {
+        try {
+            $bt = $service->activate($slug);
+        } catch (\RuntimeException $e) {
+            if ($e->getCode() === 404) {
+                return $this->json(['code' => 'not_found', 'message' => $e->getMessage()], 404);
+            }
+            throw $e;
+        }
+
+        return $this->json([
+            'slug' => $bt->getSlug(),
+            'title' => $bt->getTitle(),
+            'description' => $bt->getDescription(),
+            'durationSlots' => $bt->getDurationSlots(),
+            'active' => $bt->isActive(),
+        ]);
+    }
+
+    /**
      * All Slots with their state within the Host horizon.
      */
     #[Route('/availability', methods: ['GET'])]

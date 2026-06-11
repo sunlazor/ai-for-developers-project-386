@@ -72,6 +72,12 @@ export const api = {
             headers: authHeaders(token),
         }),
 
+    activateBookingType: (slug: string, token: string): Promise<BookingType> =>
+        request(`/host/booking-types/${slug}/activate`, {
+            method: 'POST',
+            headers: authHeaders(token),
+        }),
+
     getHostAvailability: (token: string): Promise<HostSlot[]> =>
         request('/host/availability', {headers: authHeaders(token)}),
 

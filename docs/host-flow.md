@@ -102,28 +102,32 @@ The **Booking Types** section appears at the top of the dashboard (above
 Availability). It lists all Booking Types (active and inactive) and lets the
 Host create new ones or deactivate old ones.
 
-| Step | Action                   | UI / API                                                                                                                            |
-|------|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
-| 5.1  | Dashboard loads          | `GET /api/booking-types` → `BookingType[]` (all types, active + inactive)                                                           |
-| 5.2  | Host sees                | Cards for each Booking Type showing title, description, duration (`durationSlots × 15 min`), and an **Active** / **Inactive** badge |
-| 5.3  | Host clicks "New Type"   | Opens an inline or modal **create form** with fields: slug, title, description, durationSlots                                       |
-| 5.4  | Host fills & submits     | `POST /api/host/booking-types` with `CreateBookingType` body                                                                        |
-| 5.5  | Success                  | Card added to the grid; toast "Booking Type created"                                                                                |
-| 5.6  | Duplicate slug           | `422 Unprocessable` → toast "Slug already exists"                                                                                   |
-| 5.7  | Host clicks "Deactivate" | Confirmation dialog → `POST /api/host/booking-types/{slug}/deactivate`                                                              |
-| 5.8  | Success                  | Card badge flips to **Inactive**; toast "Booking Type deactivated"                                                                  |
-| 5.9  | Not found                | `404 Not Found` → toast error                                                                                                       |
+| Step | Action                                     | UI / API                                                                                                                            |
+|------|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| 5.1  | Dashboard loads                            | `GET /api/booking-types` → `BookingType[]` (all types, active + inactive)                                                           |
+| 5.2  | Host sees                                  | Cards for each Booking Type showing title, description, duration (`durationSlots × 15 min`), and an **Active** / **Inactive** badge |
+| 5.3  | Host clicks "New Type"                     | Opens an inline or modal **create form** with fields: slug, title, description, durationSlots                                       |
+| 5.4  | Host fills & submits                       | `POST /api/host/booking-types` with `CreateBookingType` body                                                                        |
+| 5.5  | Success                                    | Card added to the grid; toast "Booking Type created"                                                                                |
+| 5.6  | Duplicate slug                             | `422 Unprocessable` → toast "Slug already exists"                                                                                   |
+| 5.7  | Host clicks "Deactivate" on an active type | Confirmation dialog → `POST /api/host/booking-types/{slug}/deactivate`                                                              |
+| 5.8  | Success                                    | Card badge flips to **Inactive**; toast "Booking Type deactivated"                                                                  |
+| 5.9  | Host clicks "Activate" on an inactive type | Confirmation dialog → `POST /api/host/booking-types/{slug}/activate`                                                                |
+| 5.10 | Success                                    | Card badge flips to **Active**; toast "Booking Type activated"                                                                      |
+| 5.11 | Not found                                  | `404 Not Found` → toast error                                                                                                       |
 
 **Key rules:**
 
 - **Slug** and **durationSlots** are immutable after creation.
-- Deactivation is **soft** — `active = false`. The record is retained and
-  existing Bookings referencing it remain valid.
+- Deactivation is **soft** — `active = false`. Activation sets `active = true`.
+  The record is retained and existing Bookings referencing it remain valid.
 - Only **title** and **description** can be edited after creation (via
   `PATCH /api/host/booking-types/{slug}`); this is a future enhancement not yet
   exposed in the UI.
 - Deactivated Booking Types are hidden from the Visitor flow but still visible
   to the Host.
+- An inactive type that has no future Bookings can be safely activated again to
+  resume accepting new Bookings.
 
 ---
 
@@ -154,6 +158,7 @@ Host create new ones or deactivate old ones.
 | POST   | `/api/host/bookings/{id}/cancel`            | —                    | `204`               |
 | POST   | `/api/host/booking-types`                   | `CreateBookingType`  | `201 + BookingType` |
 | POST   | `/api/host/booking-types/{slug}/deactivate` | —                    | `BookingType`       |
+| POST   | `/api/host/booking-types/{slug}/activate`   | —                    | `BookingType`       |
 | PATCH  | `/api/host/booking-types/{slug}`            | `UpdateBookingType`  | `BookingType`       |
 
 All Host endpoints require authentication (see the Auth note above).
@@ -185,12 +190,19 @@ flowchart TD
     M0 -->|422| O0[Toast: duplicate slug]
     M0 -->|401| C
 
-    I0 --> P0[Host clicks Deactivate]
+    I0 --> P0[Host clicks Deactivate on active type]
     P0 --> Q0[Confirm dialog]
     Q0 --> R0{POST /api/host/booking-types/:slug/deactivate}
     R0 -->|200| S0[Badge → Inactive + toast]
     R0 -->|404| T0[Toast: not found]
     R0 -->|401| C
+
+    I0 --> P1[Host clicks Activate on inactive type]
+    P1 --> Q1[Confirm dialog]
+    Q1 --> R1{POST /api/host/booking-types/:slug/activate}
+    R1 -->|200| S1[Badge → Active + toast]
+    R1 -->|404| T1[Toast: not found]
+    R1 -->|401| C
 
     I --> K[Host toggles unavailable/available Slots]
     K --> L{PUT /api/host/availability}

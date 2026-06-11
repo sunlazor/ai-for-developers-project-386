@@ -115,6 +115,22 @@ export interface paths {
         patch: operations["HostApi_updateBookingType"];
         trace?: never;
     };
+    "/api/host/booking-types/{slug}/activate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["HostApi_activateBookingType"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/host/booking-types/{slug}/deactivate": {
         parameters: {
             query?: never;
@@ -533,6 +549,49 @@ export interface operations {
                 "application/json": components["schemas"]["UpdateBookingType"];
             };
         };
+        responses: {
+            /** @description The request has succeeded. */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BookingType"];
+                };
+            };
+            /**
+             * @description Returned by Host-only endpoints when the Bearer token is missing or invalid.
+             *     There is exactly one Host; Visitor endpoints are public.
+             */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Unauthorized"];
+                };
+            };
+            /** @description The server cannot find the requested resource. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotFound"];
+                };
+            };
+        };
+    };
+    HostApi_activateBookingType: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: components["schemas"]["Slug"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
         responses: {
             /** @description The request has succeeded. */
             200: {

@@ -265,6 +265,13 @@ namespace HostApi {
     | NotFound
     | Unauthorized;
 
+  @route("/booking-types/{slug}/activate")
+  @post
+  op activateBookingType(@path slug: Slug):
+    | BookingType
+    | NotFound
+    | Unauthorized;
+
   // --- Availability ---
 
   /** All Slots with their state within the Host horizon. */

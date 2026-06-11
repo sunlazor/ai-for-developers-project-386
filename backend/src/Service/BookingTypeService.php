@@ -109,4 +109,21 @@ class BookingTypeService
         $this->em->flush();
         return $bt;
     }
+
+    /**
+     * Activate a previously deactivated Booking Type.
+     *
+     * @throws \RuntimeException 404 if not found
+     */
+    public function activate(string $slug): BookingType
+    {
+        $bt = $this->em->getRepository(BookingType::class)->find($slug);
+        if ($bt === null) {
+            throw new \RuntimeException('Booking Type not found.', 404);
+        }
+
+        $bt->setActive(true);
+        $this->em->flush();
+        return $bt;
+    }
 }
