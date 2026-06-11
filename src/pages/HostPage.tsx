@@ -19,6 +19,8 @@ import {formatTime, formatDate} from '@/lib/utils'
 export function HostPage() {
     const [token, setToken] = useState('')
     const [isAuthed, setIsAuthed] = useState(false)
+    const [isVerifying, setIsVerifying] = useState(false)
+    const [authError, setAuthError] = useState<string | null>(null)
     const [confirmAction, setConfirmAction] = useState<{
         type: 'activate' | 'deactivate'
         slug: string
@@ -90,13 +92,37 @@ export function HostPage() {
             <section>
                 <h1 className="text-3xl font-bold mb-4">Host Dashboard</h1>
                 {!isAuthed ? (
-                    <div className="flex gap-2 max-w-sm">
-                        <Input
-                            placeholder="Bearer token"
-                            value={token}
-                            onChange={(e) => setToken(e.target.value)}
-                        />
-                        <Button onClick={() => setIsAuthed(true)}>Login</Button>
+                    <div className="flex gap-2 max-w-sm flex-col">
+                        <div className="flex gap-2">
+                            <Input
+                                placeholder="Host token"
+                                value={token}
+                                onChange={(e) => {
+                                    setToken(e.target.value)
+                                    setAuthError(null)
+                                }}
+                            />
+                            <Button
+                                onClick={async () => {
+                                    setIsVerifying(true)
+                                    setAuthError(null)
+                                    try {
+                                        await api.getHostAvailability(token)
+                                        setIsAuthed(true)
+                                    } catch {
+                                        setAuthError('Wrong token')
+                                    } finally {
+                                        setIsVerifying(false)
+                                    }
+                                }}
+                                disabled={isVerifying}
+                            >
+                                {isVerifying ? 'Verifying…' : 'Login'}
+                            </Button>
+                        </div>
+                        {authError && (
+                            <p className="text-sm text-destructive">{authError}</p>
+                        )}
                     </div>
                 ) : (
                     <Button variant="outline" onClick={() => {
