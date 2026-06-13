@@ -87,6 +87,20 @@ As an agent, do **not** start these servers yourself unless asked — assume the
 human runs them, and ask them to restart if you changed `main.tsp` or the
 backend code.
 
+### Running in Docker
+
+The whole app (SPA + Symfony backend) also ships as a **single container**
+(ADR-0004). Unlike local dev there is **no Vite proxy**: the PHP built-in server
+serves the built SPA and `/api` from one origin on `$PORT`.
+
+```sh
+docker build -t calendai .
+docker run -e PORT=8080 -p 8080:8080 calendai   # http://localhost:8080
+```
+
+`PORT` selects the listen port (default `8080`). Migrations run and `AppFixtures`
+seeds once on first boot (`LOAD_FIXTURES=force` re-seeds, `skip` disables).
+
 ## Verification gate
 
 Before declaring any change done, all of these must pass:
