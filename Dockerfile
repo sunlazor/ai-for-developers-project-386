@@ -41,11 +41,22 @@ RUN composer install \
 # ---------------------------------------------------------------------------
 # Stage 3: runtime
 # ---------------------------------------------------------------------------
-FROM php:8.2-cli-alpine AS runtime
+FROM php:8.2-cli AS runtime
 
 # pdo_sqlite for the database; ctype/iconv are required by Symfony.
-RUN docker-php-ext-install pdo pdo_sqlite intl xsl iconv gd sodium zip curl \
-    && apk add --no-cache icu-libs
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libsqlite3-dev \
+    libicu-dev \
+    libxslt1-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libsodium-dev \
+    libzip-dev \
+    libcurl4-openssl-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) pdo pdo_sqlite intl xsl gd sodium zip curl \
+    && rm -rf /var/lib/apt/lists/*
 
 ENV APP_ENV=prod \
     APP_DEBUG=0 \
