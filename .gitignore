@@ -8,10 +8,6 @@
 /package-lock.json
 /dist/
 
-# AI agent skill directories
-/.agents/
-/.gemini/
-
 # Symfony backend
 /backend/vendor/
 /backend/var/
