@@ -12,7 +12,8 @@
     "typespec:compile": "tsp compile main.tsp && npm run typegen && node scripts/add-mock-examples.mjs",
     "typegen": "openapi-typescript ./tsp-output/openapi/openapi.yaml -o ./src/types/openapi.ts",
     "mock": "prism mock ./tsp-output/openapi/openapi.yaml",
-    "test": "vitest"
+    "test": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
@@ -40,6 +41,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "@stoplight/prism-cli": "^5.14.2",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",

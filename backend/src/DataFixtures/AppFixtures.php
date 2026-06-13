@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\DataFixtures;
 
-use App\Entity\Booking;
 use App\Entity\BookingType;
 use App\Entity\Slot;
 use App\Entity\SlotState;
@@ -26,7 +25,6 @@ class AppFixtures extends Fixture
     {
         $this->seedBookingTypes($manager);
         $this->seedSlots($manager);
-        $this->seedBookings($manager);
 
         $manager->flush();
     }
@@ -68,89 +66,18 @@ class AppFixtures extends Fixture
             $cursor = $cursor->modify('+15 minutes');
         }
 
-        // Open specific slots as `available` (matching the openapi.yaml examples).
-        $availableStarts = [
-            '2026-06-08T09:00:00',
-            '2026-06-08T09:15:00',
-            '2026-06-08T09:30:00',
-            '2026-06-08T09:45:00',
-            '2026-06-08T10:15:00',
-            '2026-06-09T14:00:00',
-            '2026-06-09T14:15:00',
-            '2026-06-09T15:00:00',
-            '2026-06-09T15:15:00',
-            '2026-06-09T15:30:00',
-            '2026-06-09T15:45:00',
-            '2026-06-10T10:00:00',
-            '2026-06-10T10:15:00',
-            '2026-06-10T10:30:00',
-            '2026-06-10T10:45:00',
-            '2026-06-11T13:00:00',
-            '2026-06-11T14:00:00',
-            '2026-06-11T14:15:00',
-            '2026-06-11T14:30:00',
-            '2026-06-11T14:45:00',
-            '2026-06-15T09:00:00',
-            '2026-06-15T09:15:00',
-            '2026-06-15T09:30:00',
-            '2026-06-15T09:45:00',
-            '2026-06-16T09:00:00',
-            '2026-06-16T09:15:00',
-            '2026-06-16T09:30:00',
-            '2026-06-16T10:00:00',
-            '2026-06-17T14:00:00',
-            '2026-06-17T14:15:00',
-            '2026-06-17T14:30:00',
-            '2026-06-17T14:45:00',
-        ];
-
-        foreach ($availableStarts as $ts) {
-            if (isset($this->slotMap[$ts])) {
-                $this->slotMap[$ts]->setState(SlotState::Available);
+        // Open a block of 4 consecutive slots at 09:00 UTC for the next 7 days
+        // (starting tomorrow), so every active Booking Type — including the
+        // 60-minute "Deep Dive Session" (4 slots) — can be booked.
+        $dayCursor = new \DateTimeImmutable('tomorrow midnight', $utc);
+        for ($i = 0; $i < 7; $i++) {
+            for ($s = 0; $s < 4; $s++) {
+                $key = $dayCursor->setTime(9, $s * 15)->format('Y-m-d\TH:i:s');
+                if (isset($this->slotMap[$key])) {
+                    $this->slotMap[$key]->setState(SlotState::Available);
+                }
             }
-        }
-
-        // Mark booked slots (occupied by the two seed Bookings).
-        $bookedStarts = [
-            '2026-06-09T10:30:00',
-            '2026-06-09T10:45:00',
-            '2026-06-12T14:00:00',
-            '2026-06-12T14:15:00',
-            '2026-06-12T14:30:00',
-            '2026-06-12T14:45:00',
-        ];
-
-        foreach ($bookedStarts as $ts) {
-            if (isset($this->slotMap[$ts])) {
-                $this->slotMap[$ts]->setState(SlotState::Booked);
-            }
-        }
-    }
-
-    private function seedBookings(ObjectManager $manager): void
-    {
-        $utc = new \DateTimeZone('UTC');
-
-        $bookings = [
-            [
-                '2026-06-09-10-30',
-                'intro-call',
-                new \DateTimeImmutable('2026-06-09T10:30:00', $utc),
-                'Alice Johnson',
-                'alice@example.com',
-            ],
-            [
-                '2026-06-12-14-00',
-                'deep-dive',
-                new \DateTimeImmutable('2026-06-12T14:00:00', $utc),
-                'Bob Smith',
-                'bob@example.com',
-            ],
-        ];
-
-        foreach ($bookings as [$id, $slug, $start, $name, $email]) {
-            $booking = new Booking($id, $slug, $start, $name, $email);
-            $manager->persist($booking);
+            $dayCursor = $dayCursor->modify('+1 day');
         }
     }
 }
