@@ -8,9 +8,12 @@ deployable to PaaS platforms that inject a `PORT` environment variable.
 
 A multi-stage `Dockerfile` (repo root) produces one runtime image:
 
-1. **web** (`node:20-alpine`) builds the SPA with `npm run build` into `dist/`.
+1. **web** (`node:22-alpine`) builds the SPA with `npm run build` into `dist/`.
    `src/types/openapi.ts` is committed, so the build is self-contained and does
-   not need the TypeSpec toolchain.
+   not need the TypeSpec toolchain. Node 22 is required because parts of the dev
+   toolchain (`@typespec/*`, `@scalar/*`) declare `node >=22`. Because
+   `package-lock.json` is gitignored, the stage uses `npm ci` when a lockfile is
+   present and falls back to `npm install` otherwise.
 2. **php-deps** (`composer:2`) installs the Symfony production dependencies
    (`--no-dev --optimize-autoloader`).
 3. **runtime** (`php:8.2-cli-alpine`) copies the backend, its `vendor/`, and the

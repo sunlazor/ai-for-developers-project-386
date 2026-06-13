@@ -4,12 +4,15 @@
 # ---------------------------------------------------------------------------
 # Stage 1: build the React SPA -> dist/
 # ---------------------------------------------------------------------------
-FROM node:20-alpine AS web
+FROM node:22-alpine AS web
 
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm ci
+# package-lock.json is gitignored, so it may be absent in a clean checkout.
+# Use `npm ci` when a lockfile is present, otherwise fall back to `npm install`.
+COPY package.json ./
+COPY package-lock.json* ./
+RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
 
 # Sources needed for the typecheck + Vite build.
 COPY tsconfig.json tsconfig.node.json vite.config.ts index.html ./
