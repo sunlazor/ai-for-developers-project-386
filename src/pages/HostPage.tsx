@@ -87,7 +87,7 @@ export function HostPage() {
     return (
         <div className="max-w-4xl mx-auto space-y-8">
             <section>
-                <h1 className="text-3xl font-bold mb-4">Host Dashboard</h1>
+                <h1 className="text-3xl font-bold mb-4">Host Dashboard (token: calendai-host-secret)</h1>
                 {!isAuthed ? (
                     <div className="flex gap-2 max-w-sm flex-col">
                         <div className="flex gap-2">
