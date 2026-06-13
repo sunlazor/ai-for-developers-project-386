@@ -44,7 +44,7 @@ RUN composer install \
 FROM php:8.2-cli-alpine AS runtime
 
 # pdo_sqlite for the database; ctype/iconv are required by Symfony.
-RUN docker-php-ext-install pdo pdo_sqlite \
+RUN docker-php-ext-install pdo pdo_sqlite intl xsl iconv gd sodium zip curl \
     && apk add --no-cache icu-libs
 
 ENV APP_ENV=prod \
