@@ -208,8 +208,8 @@ class SlotService
     }
 
     /**
-     * Cancel a Booking. Its Slots return to `unavailable` (not `available`);
-     * the Host must explicitly re-open them to make them bookable again.
+     * Cancel a Booking. Its Slots return to `available` so the Host can
+     * manage them immediately without manual re-opening.
      *
      * @throws \RuntimeException 404 if booking not found
      */
@@ -220,14 +220,10 @@ class SlotService
             throw new \RuntimeException('Booking not found.', 404);
         }
 
-        // Determine how many slots this booking occupies by looking up the BookingType.
-        // We need to find the BookingType to get durationSlots.
         $bookingTypeRepo = $this->em->getRepository(\App\Entity\BookingType::class);
         $bookingType = $bookingTypeRepo->find($booking->getBookingTypeSlug());
 
         if ($bookingType === null) {
-            // Fallback: assume the booking occupies slots until the next booking or horizon end.
-            // This shouldn't happen in a well-seeded database, but handle gracefully.
             $durationSlots = 1;
         } else {
             $durationSlots = $bookingType->getDurationSlots();
@@ -238,7 +234,7 @@ class SlotService
         for ($i = 0; $i < $durationSlots; $i++) {
             $slot = $this->em->getRepository(Slot::class)->findOneBy(['start' => $cursor]);
             if ($slot !== null && $slot->getState() === SlotState::Booked) {
-                $slot->setState(SlotState::Unavailable);
+                $slot->setState(SlotState::Available);
             }
             $cursor = $cursor->modify('+' . self::SLOT_MINUTES . ' minutes');
         }

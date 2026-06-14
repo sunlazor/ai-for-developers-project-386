@@ -80,6 +80,7 @@ export function HostPage() {
         mutationFn: (id: string) => api.cancelBooking(id, token),
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: ['host-bookings']})
+            queryClient.invalidateQueries({queryKey: ['host-availability']})
             toast({title: 'Cancelled'})
         },
     })

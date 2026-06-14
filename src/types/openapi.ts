@@ -175,8 +175,8 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description Cancel a Booking. Its Slots return to `unavailable` (not `available`); the
-         *     Host must explicitly re-open them to make them bookable again.
+         * @description Cancel a Booking. Its Slots return to `available` so the Host can
+         *     manage them immediately without manual re-opening.
          */
         post: operations["HostApi_cancelBooking"];
         delete?: never;

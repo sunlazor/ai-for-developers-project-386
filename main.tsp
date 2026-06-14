@@ -303,8 +303,8 @@ namespace HostApi {
   op listBookings(): Booking[] | Unauthorized;
 
   /**
-   * Cancel a Booking. Its Slots return to `unavailable` (not `available`); the
-   * Host must explicitly re-open them to make them bookable again.
+   * Cancel a Booking. Its Slots return to `available` so the Host can
+   * manage them immediately without manual re-opening.
    */
   @route("/bookings/{id}/cancel")
   @post
