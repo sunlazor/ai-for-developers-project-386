@@ -103,7 +103,7 @@ export function generateSlotStarts(start: Date, end: Date): string[] {
         const minutes = current.getUTCMinutes()
         const roundedMinutes = Math.floor(minutes / 15) * 15
         current.setUTCMinutes(roundedMinutes, 0, 0)
-        slots.push(current.toISOString())
+        slots.push(current.toISOString().replace(/\.\d{3}Z$/, 'Z'))
         current.setUTCMinutes(current.getUTCMinutes() + 15)
     }
     return slots
