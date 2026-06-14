@@ -32,6 +32,13 @@ grid of slots, four per hour. A Slot is *unavailable* by default, *available*
 when the Host opens it for booking, or *booked* when a Booking occupies it.
 _Avoid_: timeslot, interval, period
 
+**Phantom Slot**:
+A Slot that appears in the Host's management view but does not yet exist in the
+database. Every 15-minute slot of a day is shown to the Host; ones without a
+corresponding record are phantom slots, rendered as unavailable. Clicking a
+phantom slot creates it as available in the database.
+_Avoid_: placeholder slot, virtual slot, ghost slot
+
 **Availability**:
 The set of Slots the Host has opened for booking. A Booking can only be placed
 on Slots that are available and not already booked.
