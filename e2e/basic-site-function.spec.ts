@@ -26,7 +26,7 @@ test.describe('Visitor booking flow', () => {
         const slotTime = slotDate.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
-            hour12: true,
+            hour12: false,
             timeZone: 'UTC',
         })
 
