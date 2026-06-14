@@ -2,6 +2,7 @@ import {useState, useMemo} from 'react'
 import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query'
 import {api} from '@/api/client'
 import {Button} from '@/components/ui/button'
+import {Tabs, TabsList, TabsTrigger} from '@/components/ui/tabs'
 import {toast} from '@/components/ui/use-toast'
 import {
     getMondayOfWeek,
@@ -21,23 +22,26 @@ interface SlotManagerProps {
     token: string
 }
 
+const WEEK_COUNT = 5
+
 function useCurrentWeek() {
     const [weekOffset, setWeekOffset] = useState(0)
-    const monday = useMemo(() => {
-        const base = getMondayOfWeek(new Date())
-        base.setUTCDate(base.getUTCDate() + weekOffset * 7)
-        return base
-    }, [weekOffset])
+    const allMondays = useMemo(() => {
+        const baseMonday = getMondayOfWeek(new Date())
+        return Array.from({length: WEEK_COUNT}, (_, i) => {
+            const m = new Date(baseMonday)
+            m.setUTCDate(baseMonday.getUTCDate() + i * 7)
+            return m
+        })
+    }, [])
+    const monday = allMondays[weekOffset]
     const days = useMemo(() => getWeekDays(monday), [monday])
-    return {monday, days, weekOffset, setWeekOffset}
+    return {monday, days, weekOffset, allMondays, setWeekOffset}
 }
 
 export function SlotManager({token}: SlotManagerProps) {
     const queryClient = useQueryClient()
-    const {monday, days, setWeekOffset} = useCurrentWeek()
-
-    const weekEnd = new Date(monday)
-    weekEnd.setUTCDate(monday.getUTCDate() + 6)
+    const {days, weekOffset, allMondays, setWeekOffset} = useCurrentWeek()
 
     const [selectedDay, setSelectedDay] = useState<Date | null>(days[0])
 
@@ -124,27 +128,27 @@ export function SlotManager({token}: SlotManagerProps) {
     return (
         <div className="space-y-4">
             <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setWeekOffset(wo => wo - 1)}
-                        disabled={editAvailability.isPending}
-                    >
-                        &larr; Prev Week
-                    </Button>
-                    <span className="font-medium text-sm">
-                        {formatDateShort(monday)} — {formatDateShort(weekEnd)}
-                    </span>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setWeekOffset(wo => wo + 1)}
-                        disabled={editAvailability.isPending}
-                    >
-                        Next Week &rarr;
-                    </Button>
-                </div>
+                <Tabs
+                    value={String(weekOffset)}
+                    onValueChange={(v) => {
+                        const offset = Number(v)
+                        setWeekOffset(offset)
+                        const newMonday = allMondays[offset]
+                        setSelectedDay(getWeekDays(newMonday)[0])
+                    }}
+                >
+                    <TabsList>
+                        {allMondays.map((m, i) => {
+                            const weekEnd = new Date(m)
+                            weekEnd.setUTCDate(m.getUTCDate() + 6)
+                            return (
+                                <TabsTrigger key={i} value={String(i)} className="text-xs px-2 py-1.5">
+                                    {formatDateShort(m)} — {formatDateShort(weekEnd)}
+                                </TabsTrigger>
+                            )
+                        })}
+                    </TabsList>
+                </Tabs>
                 <span className="text-sm text-muted-foreground">
                     {openCount} open slots
                 </span>
